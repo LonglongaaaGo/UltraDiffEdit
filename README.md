@@ -1,6 +1,6 @@
 # UltraDiffEdit: Tuning-Free Latent Diffusion Models for Ultra High-Resolution Image Editing
-[![Project Page](https://img.shields.io/badge/Project-Page-green.svg)](https://ruoyidu.github.io/demofusion/demofusion.html)
-[![arXiv](https://img.shields.io/badge/arXiv-2311.16973-b31b1b.svg)](https://arxiv.org/pdf/2311.16973.pdf)
+
+[![arXiv](https://img.shields.io/badge/Paper-IEEE-red.svg)](https://ieeexplore.ieee.org/document/11591429)
 
 [//]: # ([![Replicate]&#40;https://img.shields.io/badge/Demo-%F0%9F%9A%80%20Replicate-blue&#41;]&#40;https://replicate.com/lucataco/demofusion&#41;)
 
