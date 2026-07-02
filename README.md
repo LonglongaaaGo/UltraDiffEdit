@@ -135,7 +135,7 @@ For ControlNet examples, the script first creates a 1K ControlNet inpainting res
 - `demo.py` is a minimal smoke-test script for the official SDXL pipeline.
 - `examples/` contains the cleaned runnable examples for ControlNet and IP-Adapter use cases.
 - `tools/mask_gui.py` is a small optional utility for drawing binary inpainting masks.
-- `legacy/` contains historical backups and ablation scripts kept for reference only.
+- Historical backups and ablation scripts are preserved on the `legacy` branch.
 - `pietorch_local/` provides the Poisson blending utility used by the final image blending step.
 
 ## Citation
