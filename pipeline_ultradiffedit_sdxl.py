@@ -2039,11 +2039,11 @@ class StableAnysizeInpaintPipeline(
                     Alpha_t = self.scheduler.alphas[t.cpu().int()]
                     P_ = Alpha_t + (1 - Alpha_t) / (ug_scale * ug_scale)
                     P_sqrt = P_ ** 0.5
-                    up_stride = stride* ug_scale  # revise
+                    up_stride = stride * ug_scale
                     #### for memory saving
                     ug_view_batch_size= view_batch_size//4 
                     # first get the coordinates of each patch
-                    views = self.get_views(current_height, current_width, stride=up_stride*ug_scale,
+                    views = self.get_views(current_height, current_width, stride=up_stride,
                                            window_size=self.unet.config.sample_size*ug_scale, random_jitter=True)
 
                     # then group batches based on view_barch_size
@@ -3155,12 +3155,12 @@ class StableAnysizeInpaintPipeline(
                     Alpha_t = self.scheduler.alphas[t.cpu().int()]
                     P_ = Alpha_t + (1 - Alpha_t) / (ug_scale * ug_scale)
                     P_sqrt = P_ ** 0.5
-                    up_stride = stride* ug_scale  # revise
+                    up_stride = stride * ug_scale
 
                     #### for memory saving
                     ug_view_batch_size = view_batch_size // 4
                     # first get the coordinates of each patch
-                    views = self.get_views(current_height, current_width, stride=up_stride*ug_scale,
+                    views = self.get_views(current_height, current_width, stride=up_stride,
                                            window_size=self.unet.config.sample_size * ug_scale, random_jitter=True)
 
                     # views = self.views_filter(views, cur_mask)

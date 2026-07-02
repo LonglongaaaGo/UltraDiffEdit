@@ -9,7 +9,7 @@ def get_start_size(width,height,fix_size=1024):
 
     return size
 
-def main(encoding_stride = None):
+def main():
     """
     ultraDiffEdit main script
     """
@@ -17,8 +17,7 @@ def main(encoding_stride = None):
     from Util.caption_read import read_lines_from_file
     from diffusers.utils import load_image
     import argparse
-    # from pipeline_ultradiffedit_sdxl import  StableAnysizeInpaintPipeline  # it chanced the padding fucntion, but may not work well
-    from pipeline_ultradiffedit_sdxl_bk import  StableAnysizeInpaintPipeline  # it is the original version, but still have the issue for diverse aspect ratio
+    from pipeline_ultradiffedit_sdxl import StableAnysizeInpaintPipeline
     import math
     import time
     import torch
@@ -47,13 +46,8 @@ def main(encoding_stride = None):
     parser.add_argument('--save_root', type=str, default='./results',help='root for saving the images')
     parser.add_argument('--stages', type=str, default='two',help='[two, three, S] stages setting for inference')
     parser.add_argument("--stride", type=int, default=64, help="the stride to use for the inference")
-    parser.add_argument("--encoding_stride", type=int, default=1024, help="the stride to use for the inference")
 
     args = parser.parse_args()
-
-    if encoding_stride is not None:
-        args.encoding_stride = encoding_stride
-    print("encoding_stride is: ",args.encoding_stride)
     
     os.makedirs(args.save_root, exist_ok=True)
 
@@ -129,7 +123,6 @@ def main(encoding_stride = None):
             tar_width=width,
             view_batch_size=args.view_batch_size,
             stride=args.stride,
-            multi_patch_encoding_stride = args.encoding_stride,
             beta_scale_1=args.beta1, beta_scale_2=args.beta2, 
             cosine_scale_3=1, sigma=0.8,
             multi_decoder=True, show_image=False,
@@ -167,8 +160,7 @@ def main5_outpainting():
     from Util.caption_read import read_lines_from_file
     from diffusers.utils import load_image
     import argparse
-    # from pipeline_ultradiffedit_sdxl import  StableAnysizeInpaintPipeline  # it chanced the padding fucntion, but may not work well
-    from pipeline_ultradiffedit_sdxl_bk import  StableAnysizeInpaintPipeline  # it is the original version, but still have the issue for diverse aspect ratio
+    from pipeline_ultradiffedit_sdxl import StableAnysizeInpaintPipeline
     import math
     import time
     import torch
@@ -195,7 +187,6 @@ def main5_outpainting():
     parser.add_argument('--save_root', type=str, default='./results',help='root for saving the images')
     parser.add_argument('--stages', type=str, default='two',help='[two, three, S] stages setting for inference')
     parser.add_argument("--stride", type=int, default=64, help="the stride to use for the inference")
-    parser.add_argument("--encoding_stride", type=int, default=1024, help="the stride to use for the inference")
 
     args = parser.parse_args()
 
@@ -275,7 +266,6 @@ def main5_outpainting():
             tar_width=width,
             view_batch_size=args.view_batch_size,
             stride=args.stride,
-            multi_patch_encoding_stride = args.encoding_stride,
             beta_scale_1=args.beta1, beta_scale_2=args.beta2, 
             cosine_scale_3=1, sigma=0.8,
             multi_decoder=True, show_image=False,
@@ -306,7 +296,7 @@ def main5_outpainting():
 
 
 
-def main_showNoiseMap(encoding_stride = None):
+def main_showNoiseMap():
     """
     ultraDiffEdit main script
     """
@@ -314,11 +304,7 @@ def main_showNoiseMap(encoding_stride = None):
     from Util.caption_read import read_lines_from_file
     from diffusers.utils import load_image
     import argparse
-    # from pipeline_ultradiffedit_sdxl import  StableAnysizeInpaintPipeline  # it chanced the padding fucntion, but may not work well
-    # from pipeline_ultradiffedit_sdxl_bk import  StableAnysizeInpaintPipeline  # it is the original version, but still have the issue for diverse aspect ratio
-    # from pipeline_ultradiffedit_sdxl_bk_local import  StableAnysizeInpaintPipeline  # it is the original version, but still have the issue for diverse aspect ratio
-    # from pipeline_ultradiffedit_sdxl_bk_global import  StableAnysizeInpaintPipeline  # it is the original version, but still have the issue for diverse aspect ratio
-    from pipeline_ultradiffedit_sdxl_bk_ug import  StableAnysizeInpaintPipeline  # it is the original version, but still have the issue for diverse aspect ratio
+    from pipeline_ultradiffedit_sdxl import StableAnysizeInpaintPipeline
 
     import math
     import time
@@ -348,16 +334,8 @@ def main_showNoiseMap(encoding_stride = None):
     parser.add_argument('--save_root', type=str, default='./results',help='root for saving the images')
     parser.add_argument('--stages', type=str, default='two',help='[two, three, S] stages setting for inference')
     parser.add_argument("--stride", type=int, default=64, help="the stride to use for the inference")
-    parser.add_argument("--encoding_stride", type=int, default=1024, help="the stride to use for the inference")
 
     args = parser.parse_args()
-
-    
-
-
-    if encoding_stride is not None:
-        args.encoding_stride = encoding_stride
-    print("encoding_stride is: ",args.encoding_stride)
     
     os.makedirs(args.save_root, exist_ok=True)
 
@@ -432,7 +410,6 @@ def main_showNoiseMap(encoding_stride = None):
             tar_width=width,
             view_batch_size=args.view_batch_size,
             stride=args.stride,
-            multi_patch_encoding_stride = args.encoding_stride,
             beta_scale_1=args.beta1, beta_scale_2=args.beta2, 
             cosine_scale_3=1, sigma=0.8,
             multi_decoder=True, show_image=False,
@@ -492,8 +469,7 @@ def main5_outpainting():
     from Util.caption_read import read_lines_from_file
     from diffusers.utils import load_image
     import argparse
-    # from pipeline_ultradiffedit_sdxl import  StableAnysizeInpaintPipeline  # it chanced the padding fucntion, but may not work well
-    from pipeline_ultradiffedit_sdxl_bk import  StableAnysizeInpaintPipeline  # it is the original version, but still have the issue for diverse aspect ratio
+    from pipeline_ultradiffedit_sdxl import StableAnysizeInpaintPipeline
     import math
     import time
     import torch
@@ -520,7 +496,6 @@ def main5_outpainting():
     parser.add_argument('--save_root', type=str, default='./results',help='root for saving the images')
     parser.add_argument('--stages', type=str, default='two',help='[two, three, S] stages setting for inference')
     parser.add_argument("--stride", type=int, default=64, help="the stride to use for the inference")
-    parser.add_argument("--encoding_stride", type=int, default=1024, help="the stride to use for the inference")
 
     args = parser.parse_args()
 
@@ -600,7 +575,6 @@ def main5_outpainting():
             tar_width=width,
             view_batch_size=args.view_batch_size,
             stride=args.stride,
-            multi_patch_encoding_stride = args.encoding_stride,
             beta_scale_1=args.beta1, beta_scale_2=args.beta2, 
             cosine_scale_3=1, sigma=0.8,
             multi_decoder=True, show_image=False,
@@ -639,8 +613,7 @@ def main4_reconstraction():
     from Util.caption_read import read_lines_from_file
     from diffusers.utils import load_image
     import argparse
-    # from pipeline_ultradiffedit_sdxl import  StableAnysizeInpaintPipeline  # it chanced the padding fucntion, but may not work well
-    from pipeline_ultradiffedit_sdxl_bk import  StableAnysizeInpaintPipeline  # it is the original version, but still have the issue for diverse aspect ratio
+    from pipeline_ultradiffedit_sdxl import StableAnysizeInpaintPipeline
     import math
     import time
     import torch
@@ -665,7 +638,6 @@ def main4_reconstraction():
     parser.add_argument('--save_root', type=str, default='./results',help='root for saving the images')
     parser.add_argument('--stages', type=str, default='two',help='[two, three, S] stages setting for inference')
     parser.add_argument("--stride", type=int, default=64, help="the stride to use for the inference")
-    parser.add_argument("--encoding_stride", type=int, default=1024, help="the stride to use for the inference")
 
     args = parser.parse_args()
 
@@ -732,7 +704,7 @@ def main4_reconstraction():
         print("the padded image size is: ", width, height)
 
         start = time.time()
-        images = pipe.reconstraction_test(
+        images = pipe(
             prompt=prompt,
             negative_prompt=negative_prompt,
             image=init_image, mask_image=mask_image, num_inference_steps=50, strength=0.80,
@@ -741,7 +713,6 @@ def main4_reconstraction():
             tar_width=width,
             view_batch_size=args.view_batch_size,
             stride=args.stride,
-            multi_patch_encoding_stride = args.encoding_stride,
             beta_scale_1=args.beta1, beta_scale_2=args.beta2, 
             cosine_scale_3=1, sigma=0.8,
             multi_decoder=True, show_image=False,
@@ -975,8 +946,7 @@ def main2_prompt_editing():
     from Util.caption_read import read_lines_from_file
     from diffusers.utils import load_image
     import argparse
-    # from pipeline_ultradiffedit_sdxl import  StableAnysizeInpaintPipeline  #
-    from pipeline_ultradiffedit_sdxl_bk import  StableAnysizeInpaintPipeline  #
+    from pipeline_ultradiffedit_sdxl import StableAnysizeInpaintPipeline
 
     import math
     import time
@@ -1176,12 +1146,6 @@ def main2_prompt_editing():
 
 if __name__ == '__main__':
 
-    # stride_list = [128,256,512,768,1024]
-    #
-    # for encoding_stride in stride_list:
-    #     print("encoding_stride:", encoding_stride)
-    #     main(encoding_stride=encoding_stride)
-   
     main()
     # main_showNoiseMap()
     # main5_outpainting()
@@ -1190,4 +1154,3 @@ if __name__ == '__main__':
     # main3_diverse_seeds()
 
     
-

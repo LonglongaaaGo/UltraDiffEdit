@@ -107,7 +107,6 @@ images[-1].save(f"results/{name}_finalout.png")
 ## Repository Notes
 
 - `pipeline_ultradiffedit_sdxl.py` is the cleaned SDXL UltraDiffEdit pipeline and should be used for normal inference.
-- `pipeline_ultradiffedit_sdxl_bk*.py` files are internal backup/ablation variants kept for reference.
 - `main.py`, `main_demofusion.py`, `main_ultra_controlnetv2.py`, and `wusterchen.py` contain internal experiment scripts and may include local paths or dependencies not required for the quick-start example.
 - `pietorch_local/` provides the Poisson blending utility used by the final image blending step.
 

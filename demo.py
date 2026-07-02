@@ -6,8 +6,7 @@ def run_demo():
     ultraDiffEdit main script
     """
     from diffusers.utils import load_image
-    # import pipeline_ultradiffedit_sdxl
-    import pipeline_ultradiffedit_sdxl_bk as pipeline_ultradiffedit_sdxl
+    import pipeline_ultradiffedit_sdxl
     import time
     import torch
     import os
@@ -71,5 +70,4 @@ def run_demo():
 
 if __name__ == '__main__':
     run_demo()
-
 
