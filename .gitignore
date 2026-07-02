@@ -20,7 +20,13 @@ logs/
 *.safetensors
 *.bin
 
-# Local paper copy
+# Local paper copies
 Tuning-Free_Latent_Diffusion_Models_for_Ultrahigh-Resolution_Image_Editing.pdf
 Tuning-Free_Latent_Diffusion_Models_for_Ultrahigh-Resolution_Image_Editing_supp.pdf
+
+# Raw historical experiments
 DemoFusion-main/
+
+# Third-party demo assets not needed by UltraDiffEdit
+pietorch_local/demo.py
+pietorch_local/example_images/

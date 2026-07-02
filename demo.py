@@ -3,17 +3,17 @@
 
 def run_demo():
     """
-    ultraDiffEdit main script
+    Minimal UltraDiffEdit demo.
     """
     from diffusers.utils import load_image
-    import pipeline_ultradiffedit_sdxl
+    from pipeline_ultradiffedit_sdxl import StableAnysizeInpaintPipeline
     import time
     import torch
     import os
 
     name_ = str(time.time())
     os.makedirs("./results", exist_ok=True)
-    pipe = pipeline_ultradiffedit_sdxl.StableAnysizeInpaintPipeline.from_pretrained(
+    pipe = StableAnysizeInpaintPipeline.from_pretrained(
         "stabilityai/stable-diffusion-xl-base-1.0",
         torch_dtype=torch.float16,
         variant="fp16",
@@ -25,8 +25,8 @@ def run_demo():
     img_url = "https://raw.githubusercontent.com/CompVis/latent-diffusion/main/data/inpainting_examples/overture-creations-5sI6fQgYIuo.png"
     mask_url = "https://raw.githubusercontent.com/CompVis/latent-diffusion/main/data/inpainting_examples/overture-creations-5sI6fQgYIuo_mask.png"
 
-    height = 8192
-    width = 8192
+    height = 2048
+    width = 2048
 
     init_image = load_image(img_url).resize((width, height))
     mask_image = load_image(mask_url).resize((width, height))
@@ -58,6 +58,7 @@ def run_demo():
             save_image_tag = False,
             file_name=name_,
             save_root='./results',
+            run_stage="two",
             ug_weight = 0.2,
 
         )
@@ -70,4 +71,3 @@ def run_demo():
 
 if __name__ == '__main__':
     run_demo()
-
