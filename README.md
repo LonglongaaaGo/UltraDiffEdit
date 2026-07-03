@@ -27,7 +27,11 @@ pip install -r requirements.txt
 
 The default examples use SDXL and require a CUDA GPU. The paper reports editing up to 8K resolution on a single NVIDIA RTX 3090. For larger images, reduce `view_batch_size` if you run out of memory.
 
-Optional ControlNet and IP-Adapter examples may additionally require `opencv-python`, `controlnet-aux`, and external ControlNet/IP-Adapter checkpoints.
+Optional ControlNet and IP-Adapter examples require a newer Diffusers release plus task-specific dependencies and external ControlNet/IP-Adapter checkpoints.
+
+```bash
+pip install -r requirements-examples.txt
+```
 
 ## Quick Start
 
@@ -113,7 +117,7 @@ The official pipeline remains `pipeline_ultradiffedit_sdxl.py`. Clean public exa
 - `examples/controlnet_canny.py`: Canny-conditioned editing. The default Canny thresholds are 100 and 200, matching the supplemental setup.
 - `examples/controlnet_depth.py`: DPT depth-conditioned editing.
 - `examples/controlnet_pose.py`: OpenPose-conditioned editing.
-- `examples/ip_adapter.py`: IP-Adapter image-prompt editing. This requires the CLIP image encoder path and IP-Adapter SDXL checkpoint path.
+- `examples/ip_adapter_ultra.py`: IP-Adapter image-prompt editing. This requires the CLIP image encoder path and IP-Adapter SDXL checkpoint path.
 
 Example:
 
@@ -127,7 +131,7 @@ python examples/controlnet_canny.py \
   --output results/canny_4k.png
 ```
 
-For ControlNet examples, the script first creates a 1K ControlNet inpainting result and then refines it with UltraDiffEdit at the target resolution. The raw historical `DemoFusion-main/` experiment folder is intentionally ignored and is not required for the public examples.
+For ControlNet examples, the script first creates a 1K ControlNet proposal, composites the generated region with the input mask, and then refines it with UltraDiffEdit at the target resolution. The raw historical `DemoFusion-main/` experiment folder is intentionally ignored and is not required for the public examples.
 
 ## Repository Notes
 

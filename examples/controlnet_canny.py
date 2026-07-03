@@ -14,7 +14,10 @@ if str(REPO_ROOT) not in sys.path:
 
 from examples.common import (
     DEFAULT_NEGATIVE_PROMPT,
+    composite_edit_region,
     load_rgb,
+    load_sdxl_controlnet_pipeline,
+    load_ultradiffedit_pipeline,
     make_canny_condition,
     make_generator,
     prepare_refinement_inputs,
@@ -23,8 +26,6 @@ from examples.common import (
     save_last_image,
     torch_dtype_for_device,
 )
-from examples.pipeline_controlnet_inpaint_sd_xl import StableDiffusionXLControlNetInpaintPipeline
-from pipeline_ultradiffedit_sdxl import StableAnysizeInpaintPipeline
 
 
 def parse_args() -> argparse.Namespace:
@@ -47,6 +48,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--refine_steps", type=int, default=30)
     parser.add_argument("--strength", type=float, default=0.8)
     parser.add_argument("--guidance_scale", type=float, default=7.5)
+    parser.add_argument("--controlnet_conditioning_scale", type=float, default=1.0)
     parser.add_argument("--view_batch_size", type=int, default=16)
     parser.add_argument("--stride", type=int, default=64)
     parser.add_argument("--run_stage", default="two", choices=["two", "three", "S"])
@@ -71,27 +73,20 @@ def main() -> None:
     first_control = make_canny_condition(first_control_source, args.low_threshold, args.high_threshold)
 
     controlnet = ControlNetModel.from_pretrained(args.controlnet_ckpt, torch_dtype=dtype)
-    first_pipe = StableDiffusionXLControlNetInpaintPipeline.from_pretrained(
-        args.ckpt,
-        controlnet=controlnet,
-        torch_dtype=dtype,
-        variant="fp16" if device == "cuda" else None,
-        use_safetensors=True,
-    ).to(device)
+    first_pipe = load_sdxl_controlnet_pipeline(args.ckpt, controlnet, dtype, device)
 
-    first_output = first_pipe(
+    first_generated = first_pipe(
         prompt=args.prompt,
         negative_prompt=args.negative_prompt,
-        image=first_image,
-        mask_image=first_mask,
-        control_image=first_control,
+        image=first_control,
         height=first_size[1],
         width=first_size[0],
         num_inference_steps=args.first_stage_steps,
-        strength=args.strength,
         guidance_scale=args.guidance_scale,
+        controlnet_conditioning_scale=args.controlnet_conditioning_scale,
         generator=generator,
     ).images[0]
+    first_output = composite_edit_region(first_generated, first_image, first_mask)
     del first_pipe, controlnet
     if device == "cuda":
         torch.cuda.empty_cache()
@@ -100,12 +95,7 @@ def main() -> None:
         image, mask, first_output, target_width, target_height
     )
 
-    pipe = StableAnysizeInpaintPipeline.from_pretrained(
-        args.ckpt,
-        torch_dtype=dtype,
-        variant="fp16" if device == "cuda" else None,
-        use_safetensors=True,
-    ).to(device)
+    pipe = load_ultradiffedit_pipeline(args.ckpt, dtype, device)
 
     images = pipe.refine_editing(
         prompt=args.prompt,

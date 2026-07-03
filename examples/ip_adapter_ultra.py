@@ -14,13 +14,13 @@ if str(REPO_ROOT) not in sys.path:
 from examples.common import (
     DEFAULT_NEGATIVE_PROMPT,
     load_rgb,
+    load_ultradiffedit_pipeline,
     prepare_refinement_inputs,
     resolve_target_size,
     save_last_image,
     torch_dtype_for_device,
 )
 from ip_adapter import IPAdapterXL_ultra_inpaint
-from pipeline_ultradiffedit_sdxl import StableAnysizeInpaintPipeline
 
 
 def parse_args() -> argparse.Namespace:
@@ -57,16 +57,11 @@ def main() -> None:
     reference_image = load_rgb(args.reference_image)
     target_width, target_height = resolve_target_size(image, args.target_width, args.target_height)
 
-    refine_image, refine_mask, content_image, original_size = prepare_refinement_inputs(
+    refine_image, refine_mask, _content_image, original_size = prepare_refinement_inputs(
         image, mask, image, target_width, target_height
     )
 
-    pipe = StableAnysizeInpaintPipeline.from_pretrained(
-        args.ckpt,
-        torch_dtype=dtype,
-        variant="fp16" if device == "cuda" else None,
-        use_safetensors=True,
-    )
+    pipe = load_ultradiffedit_pipeline(args.ckpt, dtype, device)
     adapter = IPAdapterXL_ultra_inpaint(pipe, args.image_encoder_path, args.ip_ckpt, device)
 
     images = adapter.generate(
@@ -98,4 +93,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

@@ -3,7 +3,7 @@ from __future__ import annotations
 import math
 import sys
 from pathlib import Path
-from typing import Iterable
+from typing import Iterable, Optional
 
 import torch
 from diffusers.utils import load_image
@@ -24,23 +24,63 @@ def torch_dtype_for_device(device: str) -> torch.dtype:
     return torch.float16 if device == "cuda" else torch.float32
 
 
+def sdxl_from_pretrained_kwargs(dtype: torch.dtype, device: str) -> dict:
+    kwargs = {
+        "torch_dtype": dtype,
+        "use_safetensors": True,
+    }
+    if device == "cuda":
+        kwargs["variant"] = "fp16"
+    return kwargs
+
+
+def load_ultradiffedit_pipeline(ckpt: str, dtype: torch.dtype, device: str):
+    from pipeline_ultradiffedit_sdxl import StableAnysizeInpaintPipeline
+
+    pipe = StableAnysizeInpaintPipeline.from_pretrained(
+        ckpt,
+        **sdxl_from_pretrained_kwargs(dtype, device),
+    )
+    return pipe.to(device)
+
+
+def load_sdxl_controlnet_pipeline(ckpt: str, controlnet, dtype: torch.dtype, device: str):
+    try:
+        from diffusers import StableDiffusionXLControlNetPipeline
+    except ImportError as exc:
+        raise ImportError(
+            "ControlNet examples require diffusers with StableDiffusionXLControlNetPipeline. "
+            "Install the optional example dependencies or upgrade diffusers."
+        ) from exc
+
+    pipe = StableDiffusionXLControlNetPipeline.from_pretrained(
+        ckpt,
+        controlnet=controlnet,
+        **sdxl_from_pretrained_kwargs(dtype, device),
+    )
+    return pipe.to(device)
+
+
 def load_rgb(path_or_url: str) -> Image.Image:
     return load_image(path_or_url).convert("RGB")
 
 
-def resolve_target_size(image: Image.Image, target_width: int | None, target_height: int | None) -> tuple[int, int]:
+def resolve_target_size(image: Image.Image, target_width: Optional[int], target_height: Optional[int]) -> tuple[int, int]:
     width, height = image.size
     return target_width or width, target_height or height
 
 
-def make_generator(device: str, seed: int | None) -> torch.Generator | None:
+def make_generator(device: str, seed: Optional[int]) -> Optional[torch.Generator]:
     if seed is None:
         return None
     return torch.Generator(device=device).manual_seed(seed)
 
 
 def make_canny_condition(image: Image.Image, low_threshold: int, high_threshold: int) -> Image.Image:
-    import cv2
+    try:
+        import cv2
+    except ImportError as exc:
+        raise ImportError("Canny examples require opencv-python. Install it with `pip install opencv-python`.") from exc
     import numpy as np
 
     image_array = np.array(image.convert("RGB"))
@@ -58,8 +98,14 @@ def resize_for_first_stage(
 ) -> tuple[Image.Image, Image.Image, Image.Image, tuple[int, int]]:
     width, height = image.size
     first_width, first_height = get_start_size(width, height, fix_size=resolution)
+    first_width = max(8, (first_width // 8) * 8)
+    first_height = max(8, (first_height // 8) * 8)
     size = (first_width, first_height)
     return image.resize(size), mask.resize(size), control_source.resize(size), size
+
+
+def composite_edit_region(generated: Image.Image, original: Image.Image, mask: Image.Image) -> Image.Image:
+    return Image.composite(generated.convert("RGB"), original.convert("RGB"), mask.convert("L"))
 
 
 def prepare_refinement_inputs(
@@ -90,4 +136,3 @@ def save_last_image(images: Iterable[Image.Image], output_path: str, original_si
     path = Path(output_path)
     path.parent.mkdir(parents=True, exist_ok=True)
     output.save(path)
-
