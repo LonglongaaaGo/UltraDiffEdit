@@ -1,5 +1,0 @@
-# Optional dependencies for examples/controlnet_*.py and examples/ip_adapter_ultra.py
-diffusers>=0.31.0
-opencv-python
-controlnet-aux
-safetensors
