@@ -144,6 +144,13 @@ For ControlNet examples, the script first creates a 1K ControlNet proposal, comp
 - Historical backups and ablation scripts are preserved on the `legacy` branch.
 - `pietorch_local/` provides the Poisson blending utility used by the final image blending step.
 
+## Dataset
+
+The ultrahigh-resolution image dataset evaluated in our paper is publicly available. You can download it from Baidu Netdisk or Google Drive. 
+- DIV：[Baidu Netdisk](https://pan.baidu.com/s/1L8_gIIzCn2gEpei7kuuy3A?pwd=xcfy), Password: xcfy; [Google Drive]().
+- Sys2K: [Baidu Netdisk](https://pan.baidu.com/s/1o46DmbLBfUgIfl_feZtlKQ?pwd=ign3), Password: ign3; [Google Drive]().
+- ILSVRC: [Baidu Netdisk](https://pan.baidu.com/s/1NQecPyqp22uKdJKfpoFlGA?pwd=b69w), Password: b69w; [Google Drive]().
+
 ## Citation
 
 If you find this project useful, please cite:
