@@ -151,11 +151,11 @@ For ControlNet examples, the script first creates a 1K ControlNet proposal, comp
 
 We construct three high-resolution image editing benchmarks covering 2K to 8K resolution. These releases are not raw copies of the source datasets. We reorganize and optimize the source images into editing-specific benchmarks by adding text prompts, editing masks, dilated masks, and conditional maps for the multimodal editing settings evaluated in the paper.
 
-Please cite UltraDiffEdit and the corresponding source or generation references when using these datasets:
+Source and generation papers:
 
-- `DIV2KEdit` is built from the DIV2K validation images introduced by [Agustsson and Timofte, "NTIRE 2017 Challenge on Single Image Super-Resolution: Dataset and Study," CVPRW 2017](https://openaccess.thecvf.com/content_cvpr_2017_workshops/w12/html/Agustsson_NTIRE_2017_Challenge_CVPR_2017_paper.html).
-- `Syn2KEdit` is synthesized from ChatGPT-generated prompts with [DemoFusion by Du et al., "DemoFusion: Democratising High-Resolution Image Generation With No &#36;&#36;&#36;," CVPR 2024](https://arxiv.org/abs/2311.16973).
-- `UHRSDEdit` is built from the UHRSD test images and saliency masks introduced by [Xie et al., "Pyramid Grafting Network for One-Stage High Resolution Saliency Detection," CVPR 2022](https://openaccess.thecvf.com/content/CVPR2022/html/Xie_Pyramid_Grafting_Network_for_One-Stage_High_Resolution_Saliency_Detection_CVPR_2022_paper.html).
+[![DIV2K](https://img.shields.io/badge/DIV2K-CVPRW%202017-4C72B0.svg)](https://openaccess.thecvf.com/content_cvpr_2017_workshops/w12/html/Agustsson_NTIRE_2017_Challenge_CVPR_2017_paper.html)
+[![DemoFusion](https://img.shields.io/badge/DemoFusion-CVPR%202024-6A4C93.svg)](https://arxiv.org/abs/2311.16973)
+[![UHRSD](https://img.shields.io/badge/UHRSD-CVPR%202022-2E7D32.svg)](https://openaccess.thecvf.com/content/CVPR2022/html/Xie_Pyramid_Grafting_Network_for_One-Stage_High_Resolution_Saliency_Detection_CVPR_2022_paper.html)
 
 | Benchmark | Source and Scale | Released Contents | Download |
 | --- | --- | --- | --- |
@@ -187,33 +187,6 @@ If you find this project useful, please cite:
   journal={IEEE Transactions on Neural Networks and Learning Systems},
   year={2026},
   doi={10.1109/TNNLS.2026.3707463}
-}
-```
-
-If you use the released benchmark datasets, please also cite the corresponding source or generation references:
-
-```bibtex
-@inproceedings{agustsson2017ntire,
-  title={NTIRE 2017 Challenge on Single Image Super-Resolution: Dataset and Study},
-  author={Agustsson, Eirikur and Timofte, Radu},
-  booktitle={Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition Workshops},
-  year={2017}
-}
-
-@inproceedings{du2024demofusion,
-  title={DemoFusion: Democratising High-Resolution Image Generation With No {\$\$\$}},
-  author={Du, Ruoyi and Chang, Dongliang and Hospedales, Timothy and Song, Yi-Zhe and Ma, Zhanyu},
-  booktitle={Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition},
-  pages={6159--6168},
-  year={2024}
-}
-
-@inproceedings{xie2022pyramid,
-  title={Pyramid Grafting Network for One-Stage High Resolution Saliency Detection},
-  author={Xie, Chenxi and Xia, Changqun and Ma, Mingcan and Zhao, Zhirui and Chen, Xiaowu and Li, Jia},
-  booktitle={Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition},
-  pages={11717--11726},
-  year={2022}
 }
 ```
 
