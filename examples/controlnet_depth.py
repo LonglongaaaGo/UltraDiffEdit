@@ -4,15 +4,18 @@ import argparse
 import sys
 from pathlib import Path
 
+REPO_ROOT = Path(__file__).resolve().parents[1]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from model_cache import configure_model_cache, ensure_model_cache_dir
+
+configure_model_cache()
+
 import torch
 import torch.nn.functional as F
 from diffusers import ControlNetModel
 from PIL import Image
-
-
-REPO_ROOT = Path(__file__).resolve().parents[1]
-if str(REPO_ROOT) not in sys.path:
-    sys.path.insert(0, str(REPO_ROOT))
 
 from examples.common import (
     DEFAULT_NEGATIVE_PROMPT,
@@ -60,8 +63,11 @@ def make_depth_condition(image: Image.Image, depth_ckpt: str, device: str) -> Im
     import numpy as np
     from transformers import DPTFeatureExtractor, DPTForDepthEstimation
 
-    feature_extractor = DPTFeatureExtractor.from_pretrained(depth_ckpt)
-    depth_estimator = DPTForDepthEstimation.from_pretrained(depth_ckpt).to(device)
+    feature_extractor = DPTFeatureExtractor.from_pretrained(depth_ckpt, cache_dir=ensure_model_cache_dir())
+    depth_estimator = DPTForDepthEstimation.from_pretrained(
+        depth_ckpt,
+        cache_dir=ensure_model_cache_dir(),
+    ).to(device)
 
     inputs = feature_extractor(images=image, return_tensors="pt")
     pixel_values = inputs.pixel_values.to(device)
@@ -100,7 +106,11 @@ def main() -> None:
     )
     first_control = make_depth_condition(first_control_source, args.depth_ckpt, device)
 
-    controlnet = ControlNetModel.from_pretrained(args.controlnet_ckpt, torch_dtype=dtype)
+    controlnet = ControlNetModel.from_pretrained(
+        args.controlnet_ckpt,
+        torch_dtype=dtype,
+        cache_dir=ensure_model_cache_dir(),
+    )
     first_pipe = load_sdxl_controlnet_pipeline(args.ckpt, controlnet, dtype, device)
 
     first_generated = first_pipe(

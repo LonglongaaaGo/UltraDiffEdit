@@ -5,14 +5,17 @@ import sys
 from pathlib import Path
 from typing import Iterable, Optional
 
-import torch
-from diffusers.utils import load_image
-from PIL import Image
-
-
 REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
+
+from model_cache import configure_model_cache, ensure_model_cache_dir
+
+configure_model_cache()
+
+import torch
+from diffusers.utils import load_image
+from PIL import Image
 
 from Util.img_pad_crop import crop_image_to_original, get_start_size, pad_image_to_multiple_num
 
@@ -28,6 +31,7 @@ def sdxl_from_pretrained_kwargs(dtype: torch.dtype, device: str) -> dict:
     kwargs = {
         "torch_dtype": dtype,
         "use_safetensors": True,
+        "cache_dir": ensure_model_cache_dir(),
     }
     if device == "cuda":
         kwargs["variant"] = "fp16"

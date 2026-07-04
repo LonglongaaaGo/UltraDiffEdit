@@ -1,6 +1,10 @@
 import os
 from typing import List
 
+from model_cache import configure_model_cache, ensure_model_cache_dir
+
+configure_model_cache()
+
 import torch
 from diffusers import StableDiffusionPipeline
 from diffusers.pipelines.controlnet import MultiControlNetModel
@@ -64,17 +68,21 @@ class MLPProjModel(torch.nn.Module):
 
 
 class IPAdapter:
-    def __init__(self, sd_pipe, image_encoder_path, ip_ckpt, device, num_tokens=4):
+    def __init__(self, sd_pipe, image_encoder_path, ip_ckpt, device, num_tokens=4, cache_dir=None):
         self.device = device
         self.image_encoder_path = image_encoder_path
         self.ip_ckpt = ip_ckpt
         self.num_tokens = num_tokens
+        self.cache_dir = cache_dir or ensure_model_cache_dir()
 
         self.pipe = sd_pipe.to(self.device)
         self.set_ip_adapter()
 
         # load image encoder
-        self.image_encoder = CLIPVisionModelWithProjection.from_pretrained(self.image_encoder_path).to(
+        self.image_encoder = CLIPVisionModelWithProjection.from_pretrained(
+            self.image_encoder_path,
+            cache_dir=self.cache_dir,
+        ).to(
             self.device, dtype=torch.float16
         )
         self.clip_image_processor = CLIPImageProcessor()

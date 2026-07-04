@@ -1,6 +1,9 @@
 
 
 
+from model_cache import ensure_model_cache_dir
+
+
 def run_demo():
     """
     Minimal UltraDiffEdit demo.
@@ -18,6 +21,7 @@ def run_demo():
         torch_dtype=torch.float16,
         variant="fp16",
         use_safetensors=True,
+        cache_dir=ensure_model_cache_dir(),
     )
     
     pipe.to("cuda")

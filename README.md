@@ -27,6 +27,8 @@ conda activate ultradiffedit
 pip install -r requirements.txt
 ```
 
+By default, all Hugging Face and Diffusers model downloads are cached under `/Volumes/Long_ssd/ultradiffedit_cache/huggingface/hub`. To use a different disk, set `ULTRADIFFEDIT_MODEL_CACHE` before running any script.
+
 The default examples use SDXL and require a CUDA GPU. The paper reports editing up to 8K resolution on a single NVIDIA RTX 3090. For larger images, reduce `view_batch_size` if you run out of memory.
 ControlNet and IP-Adapter examples additionally require external model checkpoints, but their Python dependencies are included in `requirements.txt`.
 
@@ -41,6 +43,7 @@ import time
 import torch
 from diffusers.utils import load_image
 
+from model_cache import ensure_model_cache_dir
 from pipeline_ultradiffedit_sdxl import StableAnysizeInpaintPipeline
 
 
@@ -52,6 +55,7 @@ pipe = StableAnysizeInpaintPipeline.from_pretrained(
     torch_dtype=torch.float16,
     variant="fp16",
     use_safetensors=True,
+    cache_dir=ensure_model_cache_dir(),
 )
 pipe.to("cuda")
 

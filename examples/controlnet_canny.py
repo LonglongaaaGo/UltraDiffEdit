@@ -4,13 +4,16 @@ import argparse
 import sys
 from pathlib import Path
 
-import torch
-from diffusers import ControlNetModel
-
-
 REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
+
+from model_cache import configure_model_cache, ensure_model_cache_dir
+
+configure_model_cache()
+
+import torch
+from diffusers import ControlNetModel
 
 from examples.common import (
     DEFAULT_NEGATIVE_PROMPT,
@@ -72,7 +75,11 @@ def main() -> None:
     )
     first_control = make_canny_condition(first_control_source, args.low_threshold, args.high_threshold)
 
-    controlnet = ControlNetModel.from_pretrained(args.controlnet_ckpt, torch_dtype=dtype)
+    controlnet = ControlNetModel.from_pretrained(
+        args.controlnet_ckpt,
+        torch_dtype=dtype,
+        cache_dir=ensure_model_cache_dir(),
+    )
     first_pipe = load_sdxl_controlnet_pipeline(args.ckpt, controlnet, dtype, device)
 
     first_generated = first_pipe(

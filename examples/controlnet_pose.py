@@ -4,14 +4,17 @@ import argparse
 import sys
 from pathlib import Path
 
-import torch
-from diffusers import ControlNetModel
-from PIL import Image
-
-
 REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
+
+from model_cache import configure_model_cache, ensure_model_cache_dir
+
+configure_model_cache()
+
+import torch
+from diffusers import ControlNetModel
+from PIL import Image
 
 from examples.common import (
     DEFAULT_NEGATIVE_PROMPT,
@@ -62,7 +65,10 @@ def make_pose_condition(image: Image.Image, annotator_ckpt: str, detect_resoluti
     except ImportError as exc:
         raise ImportError("Pose examples require controlnet-aux. Install it with `pip install controlnet-aux`.") from exc
 
-    detector = OpenposeDetector.from_pretrained(annotator_ckpt)
+    detector = OpenposeDetector.from_pretrained(
+        annotator_ckpt,
+        cache_dir=ensure_model_cache_dir(),
+    )
     return detector(
         image,
         detect_resolution=detect_resolution,
@@ -91,7 +97,11 @@ def main() -> None:
         args.condition_resolution,
     ).resize(first_size)
 
-    controlnet = ControlNetModel.from_pretrained(args.controlnet_ckpt, torch_dtype=dtype)
+    controlnet = ControlNetModel.from_pretrained(
+        args.controlnet_ckpt,
+        torch_dtype=dtype,
+        cache_dir=ensure_model_cache_dir(),
+    )
     first_pipe = load_sdxl_controlnet_pipeline(args.ckpt, controlnet, dtype, device)
 
     first_generated = first_pipe(

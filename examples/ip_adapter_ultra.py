@@ -4,12 +4,15 @@ import argparse
 import sys
 from pathlib import Path
 
-import torch
-
-
 REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
+
+from model_cache import configure_model_cache
+
+configure_model_cache()
+
+import torch
 
 from examples.common import (
     DEFAULT_NEGATIVE_PROMPT,

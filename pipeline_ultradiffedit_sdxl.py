@@ -69,6 +69,7 @@ EXAMPLE_DOC_STRING = """
         import time
         import torch
         import os
+        from model_cache import ensure_model_cache_dir
     
         name_ = str(time.time())
         os.makedirs("./results", exist_ok=True)
@@ -77,6 +78,7 @@ EXAMPLE_DOC_STRING = """
             torch_dtype=torch.float16,
             variant="fp16",
             use_safetensors=True,
+            cache_dir=ensure_model_cache_dir(),
         )
         
         pipe.to("cuda")
