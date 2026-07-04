@@ -125,19 +125,45 @@ The official pipeline remains `pipeline_ultradiffedit_sdxl.py`. Clean public exa
 - `examples/controlnet_pose.py`: OpenPose-conditioned editing.
 - `examples/ip_adapter_ultra.py`: IP-Adapter image-prompt editing. This requires the CLIP image encoder path and IP-Adapter SDXL checkpoint path.
 
-Example:
+Bundled sample inputs are available under `examples/assets/`. The sample masks are dilated masks, matching the recommended editing setup.
+
+Canny example:
 
 ```bash
 python examples/controlnet_canny.py \
-  --image path/to/image.png \
-  --mask path/to/mask.png \
-  --prompt "a restored stone archway" \
-  --target_width 4096 \
-  --target_height 4096 \
-  --output results/canny_4k.png
+  --image examples/assets/penguin.png \
+  --mask examples/assets/penguin_mask_dilate.png \
+  --prompt "a red metallic penguin standing on a rock" \
+  --target_width 1024 \
+  --target_height 680 \
+  --output results/canny_penguin.png
 ```
 
-For ControlNet examples, the script first creates a 1K ControlNet proposal, composites the generated region with the input mask, and then refines it with UltraDiffEdit at the target resolution. The raw historical `DemoFusion-main/` experiment folder is intentionally ignored and is not required for the public examples.
+Depth example:
+
+```bash
+python examples/controlnet_depth.py \
+  --image examples/assets/penguin.png \
+  --mask examples/assets/penguin_mask_dilate.png \
+  --prompt "a red metallic penguin standing on a rock" \
+  --target_width 1024 \
+  --target_height 680 \
+  --output results/depth_penguin.png
+```
+
+Pose example:
+
+```bash
+python examples/controlnet_pose.py \
+  --image examples/assets/person.png \
+  --mask examples/assets/person_mask_dilate.png \
+  --prompt "a person wearing a red jacket" \
+  --target_width 680 \
+  --target_height 1024 \
+  --output results/pose_person.png
+```
+
+For ControlNet examples, the script first creates a 1K ControlNet inpainting proposal and then refines it with UltraDiffEdit at the target resolution when the target side length is larger than 1K. The raw historical `DemoFusion-main/` experiment folder is intentionally ignored and is not required for the public examples.
 
 ## Repository Notes
 

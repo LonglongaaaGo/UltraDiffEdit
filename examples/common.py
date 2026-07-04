@@ -15,7 +15,7 @@ configure_model_cache()
 
 import torch
 from diffusers.utils import load_image
-from PIL import Image
+from PIL import Image, ImageFilter
 
 from Util.img_pad_crop import crop_image_to_original, get_start_size, pad_image_to_multiple_num
 
@@ -50,14 +50,14 @@ def load_ultradiffedit_pipeline(ckpt: str, dtype: torch.dtype, device: str):
 
 def load_sdxl_controlnet_pipeline(ckpt: str, controlnet, dtype: torch.dtype, device: str):
     try:
-        from diffusers import StableDiffusionXLControlNetPipeline
+        from diffusers import StableDiffusionXLControlNetInpaintPipeline
     except ImportError as exc:
         raise ImportError(
-            "ControlNet examples require diffusers with StableDiffusionXLControlNetPipeline. "
+            "ControlNet examples require diffusers with StableDiffusionXLControlNetInpaintPipeline. "
             "Install the optional example dependencies or upgrade diffusers."
         ) from exc
 
-    pipe = StableDiffusionXLControlNetPipeline.from_pretrained(
+    pipe = StableDiffusionXLControlNetInpaintPipeline.from_pretrained(
         ckpt,
         controlnet=controlnet,
         **sdxl_from_pretrained_kwargs(dtype, device),
@@ -105,11 +105,24 @@ def resize_for_first_stage(
     first_width = max(8, (first_width // 8) * 8)
     first_height = max(8, (first_height // 8) * 8)
     size = (first_width, first_height)
-    return image.resize(size), mask.resize(size), control_source.resize(size), size
+    return (
+        image.resize(size, Image.Resampling.BICUBIC),
+        mask.resize(size, Image.Resampling.NEAREST),
+        control_source.resize(size, Image.Resampling.BICUBIC),
+        size,
+    )
 
 
-def composite_edit_region(generated: Image.Image, original: Image.Image, mask: Image.Image) -> Image.Image:
-    return Image.composite(generated.convert("RGB"), original.convert("RGB"), mask.convert("L"))
+def composite_edit_region(
+    generated: Image.Image,
+    original: Image.Image,
+    mask: Image.Image,
+    feather_radius: float = 12.0,
+) -> Image.Image:
+    mask_l = mask.convert("L")
+    if feather_radius > 0:
+        mask_l = mask_l.filter(ImageFilter.GaussianBlur(radius=feather_radius))
+    return Image.composite(generated.convert("RGB"), original.convert("RGB"), mask_l)
 
 
 def prepare_refinement_inputs(
@@ -120,7 +133,7 @@ def prepare_refinement_inputs(
     target_height: int,
 ) -> tuple[Image.Image, Image.Image, Image.Image, tuple[int, int]]:
     image = image.resize((target_width, target_height)).convert("RGB")
-    mask = mask.resize((target_width, target_height)).convert("RGB")
+    mask = mask.resize((target_width, target_height), Image.Resampling.NEAREST).convert("RGB")
     content = content.resize((target_width, target_height)).convert("RGB")
 
     max_scale = math.ceil(max(target_width, target_height) / 1024)

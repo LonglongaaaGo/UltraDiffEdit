@@ -107,9 +107,12 @@ def main() -> None:
     first_generated = first_pipe(
         prompt=args.prompt,
         negative_prompt=args.negative_prompt,
-        image=first_control,
+        image=first_image,
+        mask_image=first_mask,
+        control_image=first_control,
         height=first_size[1],
         width=first_size[0],
+        strength=args.strength,
         num_inference_steps=args.first_stage_steps,
         guidance_scale=args.guidance_scale,
         controlnet_conditioning_scale=args.controlnet_conditioning_scale,
@@ -119,6 +122,10 @@ def main() -> None:
     del first_pipe, controlnet
     if device == "cuda":
         torch.cuda.empty_cache()
+
+    if max(target_width, target_height) <= args.condition_resolution:
+        save_last_image([first_output.resize((target_width, target_height))], args.output, (target_width, target_height))
+        return
 
     refine_image, refine_mask, content_image, original_size = prepare_refinement_inputs(
         image, mask, first_output, target_width, target_height
