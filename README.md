@@ -1,6 +1,7 @@
 # UltraDiffEdit: Tuning-Free Latent Diffusion Models for Ultrahigh-Resolution Image Editing
 
 [![IEEE TNNLS](https://img.shields.io/badge/IEEE%20TNNLS-2026-00629B?logo=ieee&logoColor=white)](https://doi.org/10.1109/TNNLS.2026.3707463)
+[![Video](https://img.shields.io/badge/Video-YouTube-FF0000?logo=youtube&logoColor=white)](https://www.youtube.com/watch?v=6Kht_Fewioc)
 [![GitHub Stars](https://img.shields.io/github/stars/LonglongaaaGo/UltraDiffEdit?style=social)](https://github.com/LonglongaaaGo/UltraDiffEdit/stargazers)
 [![Visitors](https://visitor-badge.laobi.icu/badge?page_id=LonglongaaaGo.UltraDiffEdit)](https://github.com/LonglongaaaGo/UltraDiffEdit)
 [![License](https://img.shields.io/badge/License-Apache--2.0-blue.svg)](LICENSE)
