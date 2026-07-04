@@ -149,10 +149,26 @@ For ControlNet examples, the script first creates a 1K ControlNet proposal, comp
 
 ## Dataset
 
-The ultrahigh-resolution image datasets evaluated in our paper are publicly available. You can download them from Baidu Netdisk or Google Drive.
-- DIV：[Baidu Netdisk](https://pan.baidu.com/s/1L8_gIIzCn2gEpei7kuuy3A?pwd=xcfy), Password: xcfy; [Google Drive](https://drive.google.com/file/d/1KDWC_Ysb3C33_xkeyG--oLgI2qhqC7OO/view?usp=sharing).
-- Sys2K: [Baidu Netdisk](https://pan.baidu.com/s/1o46DmbLBfUgIfl_feZtlKQ?pwd=ign3), Password: ign3; [Google Drive](https://drive.google.com/file/d/1e6M7FHtN53j8PR3OQk9eXIPp9G-lKBer/view?usp=sharing).
-- ILSVRC: [Baidu Netdisk](https://pan.baidu.com/s/1NQecPyqp22uKdJKfpoFlGA?pwd=b69w), Password: b69w; Google Drive pending.
+We construct three high-resolution image editing benchmarks covering 2K to 8K resolution. The benchmarks provide paired images, text prompts, editing masks, dilated masks, and conditional maps for the multimodal editing settings evaluated in the paper.
+
+| Benchmark | Source and Scale | Released Contents | Download |
+| --- | --- | --- | --- |
+| DIV2KEdit | 100 real 2K images from the DIV2K validation set. | Images, BLIP-2 prompts, manually adjusted object masks, dilated masks, and edge/sketch maps. | [Baidu Netdisk](https://pan.baidu.com/s/1L8_gIIzCn2gEpei7kuuy3A?pwd=xcfy), password: `xcfy`; [Google Drive](https://drive.google.com/file/d/1KDWC_Ysb3C33_xkeyG--oLgI2qhqC7OO/view?usp=sharing). |
+| Syn2KEdit | 100 synthetic 2048 x 2048 images generated from ChatGPT prompts and DemoFusion, covering diverse styles, scenes, and objects. | Images, text prompts, editing masks, dilated masks, and generated condition maps. | [Baidu Netdisk](https://pan.baidu.com/s/1o46DmbLBfUgIfl_feZtlKQ?pwd=ign3), password: `ign3`; [Google Drive](https://drive.google.com/file/d/1e6M7FHtN53j8PR3OQk9eXIPp9G-lKBer/view?usp=sharing). |
+| UHRSDEdit | 988 real images from the UHRSD test set, with resolutions ranging from 4K to 8K. | Images, prompts, saliency-derived editing masks, dilated masks, and generated condition maps. | [Baidu Netdisk](https://pan.baidu.com/s/1NQecPyqp22uKdJKfpoFlGA?pwd=b69w), password: `b69w`; Google Drive pending. |
+
+After extraction, each dataset sample uses matched file names across subfolders. The local `DIV2K_edit/` example follows this organization:
+
+```text
+DIV2K_edit/
+  img/
+  mask/
+  mask_dilate/
+  sketch/
+  caption/
+```
+
+`caption/` stores text prompts, `mask/` stores editing masks, `mask_dilate/` stores the dilated masks used for sampling, and `sketch/` stores edge/sketch control maps. Other conditional inputs used by the supplemental ControlNet settings, such as depth maps and pose keypoints, are provided or generated only where applicable. The public benchmark names are `DIV2KEdit`, `Syn2KEdit`, and `UHRSDEdit`; local archive or folder names may use underscores for convenience.
 
 ## Citation
 
