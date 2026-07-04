@@ -116,6 +116,8 @@ images[-1].save(f"results/{name}_finalout.png")
 - `ug_weight`: strength of patch-based upsample guidance sampling.
 - `save_image_tag`: save intermediate masks and results for debugging.
 
+> **Mask warning:** For reproduction and recommended use, pass dilated masks rather than tight object masks. The paper uses dilated masks to give the diffusion model more editing freedom around object boundaries; tight masks can over-constrain the edit and often produce harder seams or incomplete changes.
+
 ## Optional Multimodal Examples
 
 The official pipeline remains `pipeline_ultradiffedit_sdxl.py`. Clean public examples for the supplemental multimodal settings are provided under `examples/`:
@@ -123,9 +125,10 @@ The official pipeline remains `pipeline_ultradiffedit_sdxl.py`. Clean public exa
 - `examples/controlnet_canny.py`: Canny-conditioned editing. The default Canny thresholds are 100 and 200, matching the supplemental setup.
 - `examples/controlnet_depth.py`: DPT depth-conditioned editing.
 - `examples/controlnet_pose.py`: OpenPose-conditioned editing.
-- `examples/ip_adapter_ultra.py`: IP-Adapter image-prompt editing. This requires the CLIP image encoder path and IP-Adapter SDXL checkpoint path.
+- `examples/ip_adapter_ultra.py`: IP-Adapter visual-prompt generation. This requires the CLIP image encoder path and IP-Adapter SDXL checkpoint path.
 
-Bundled sample inputs are available under `examples/assets/`. The sample masks are dilated masks, matching the recommended editing setup.
+Bundled sample inputs are available under `examples/assets/`. The ControlNet sample masks are dilated masks, matching the paper setting and recommended editing setup.
+If only one of `--target_width` or `--target_height` is provided, the other side is inferred from the input aspect ratio. For high-resolution refinement, the examples may internally pad the canvas to a model-friendly size, but the saved output is cropped back to the requested target aspect ratio.
 
 Canny example:
 
@@ -163,7 +166,20 @@ python examples/controlnet_pose.py \
   --output results/pose_person.png
 ```
 
-For ControlNet examples, the script first creates a 1K ControlNet inpainting proposal and then refines it with UltraDiffEdit at the target resolution when the target side length is larger than 1K. The raw historical `DemoFusion-main/` experiment folder is intentionally ignored and is not required for the public examples.
+IP-Adapter example:
+
+```bash
+python examples/ip_adapter_ultra.py \
+  --image examples/assets/person.png \
+  --prompt "best quality, high quality" \
+  --target_width 2048 \
+  --target_height 2048 \
+  --image_encoder_path /path/to/CLIP-ViT-bigG-14-laion2B-39B-b160k \
+  --ip_ckpt /path/to/ip-adapter_sdxl.bin \
+  --output results/ip_adapter_person.png
+```
+
+For ControlNet examples, the script first creates a 1K ControlNet inpainting proposal and then refines it with UltraDiffEdit at the target resolution when the target side length is larger than 1K. The IP-Adapter example follows the supplementary visual-prompt generation setting: at 1K it directly runs SDXL with IP-Adapter, while targets larger than 1K use the visual prompt image as IP-Adapter conditioning and then invoke UltraDiffEdit on an internal blank canvas with a full mask. The raw historical `DemoFusion-main/` experiment folder is intentionally ignored and is not required for the public examples.
 
 ## Repository Notes
 
@@ -201,7 +217,7 @@ DIV2K_edit/
   caption/
 ```
 
-`caption/` stores text prompts, `mask/` stores editing masks, `mask_dilate/` stores the dilated masks used for sampling, and `sketch/` stores edge/sketch control maps. Other conditional inputs used by the supplemental ControlNet settings, such as depth maps and pose keypoints, are provided or generated only where applicable. The public benchmark names are `DIV2KEdit`, `Syn2KEdit`, and `UHRSDEdit`; local archive or folder names may use underscores for convenience.
+`caption/` stores text prompts, `mask/` stores the original tight editing masks, `mask_dilate/` stores the dilated masks used in the paper and recommended for inference, and `sketch/` stores edge/sketch control maps. Other conditional inputs used by the supplemental ControlNet settings, such as depth maps and pose keypoints, are provided or generated only where applicable. The public benchmark names are `DIV2KEdit`, `Syn2KEdit`, and `UHRSDEdit`; local archive or folder names may use underscores for convenience.
 
 ## Citation
 

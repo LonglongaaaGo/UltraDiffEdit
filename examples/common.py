@@ -48,6 +48,16 @@ def load_ultradiffedit_pipeline(ckpt: str, dtype: torch.dtype, device: str):
     return pipe.to(device)
 
 
+def load_sdxl_pipeline(ckpt: str, dtype: torch.dtype, device: str):
+    from diffusers import StableDiffusionXLPipeline
+
+    pipe = StableDiffusionXLPipeline.from_pretrained(
+        ckpt,
+        **sdxl_from_pretrained_kwargs(dtype, device),
+    )
+    return pipe.to(device)
+
+
 def load_sdxl_controlnet_pipeline(ckpt: str, controlnet, dtype: torch.dtype, device: str):
     try:
         from diffusers import StableDiffusionXLControlNetInpaintPipeline
@@ -71,7 +81,15 @@ def load_rgb(path_or_url: str) -> Image.Image:
 
 def resolve_target_size(image: Image.Image, target_width: Optional[int], target_height: Optional[int]) -> tuple[int, int]:
     width, height = image.size
-    return target_width or width, target_height or height
+    if target_width is None and target_height is None:
+        return width, height
+    if target_width is None:
+        scale = target_height / height
+        return max(8, int(round(width * scale))), target_height
+    if target_height is None:
+        scale = target_width / width
+        return target_width, max(8, int(round(height * scale)))
+    return target_width, target_height
 
 
 def make_generator(device: str, seed: Optional[int]) -> Optional[torch.Generator]:
@@ -139,10 +157,31 @@ def prepare_refinement_inputs(
     max_scale = math.ceil(max(target_width, target_height) / 1024)
     pad_multiple = math.lcm(max_scale * 8, 1024)
 
+    # UltraDiffEdit operates on padded canvases when needed; save_last_image crops back to original_size.
     image, original_size = pad_image_to_multiple_num(image, num=pad_multiple, color=(255, 255, 255))
     mask, _ = pad_image_to_multiple_num(mask, num=pad_multiple, color=(0, 0, 0))
     content, _ = pad_image_to_multiple_num(content, num=pad_multiple, color=(255, 255, 255))
     return image, mask, content, original_size
+
+
+def prepare_generation_inputs(
+    target_width: int,
+    target_height: int,
+    canvas_color: tuple[int, int, int] = (255, 255, 255),
+    init_image: Optional[Image.Image] = None,
+) -> tuple[Image.Image, Image.Image, tuple[int, int]]:
+    if init_image is None:
+        canvas = Image.new("RGB", (target_width, target_height), color=canvas_color)
+    else:
+        canvas = init_image.resize((target_width, target_height), Image.Resampling.BICUBIC).convert("RGB")
+    mask = Image.new("RGB", (target_width, target_height), color=(255, 255, 255))
+
+    max_scale = math.ceil(max(target_width, target_height) / 1024)
+    pad_multiple = math.lcm(max_scale * 8, 1024)
+
+    canvas, original_size = pad_image_to_multiple_num(canvas, num=pad_multiple, color=canvas_color)
+    mask, _ = pad_image_to_multiple_num(mask, num=pad_multiple, color=(255, 255, 255))
+    return canvas, mask, original_size
 
 
 def save_last_image(images: Iterable[Image.Image], output_path: str, original_size: tuple[int, int]) -> None:
