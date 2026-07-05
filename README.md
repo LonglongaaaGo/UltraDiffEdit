@@ -38,6 +38,8 @@ export ULTRADIFFEDIT_MODEL_CACHE=/path/to/your/model_cache
 The default examples use SDXL and require a CUDA GPU. The paper reports editing up to 8K resolution on a single NVIDIA RTX 3090. For larger images, reduce `view_batch_size` if you run out of memory.
 ControlNet and IP-Adapter examples additionally require external model checkpoints, but their Python dependencies are included in `requirements.txt`.
 
+> **Runtime warning:** UltraDiffEdit targets ultrahigh-resolution editing quality, not fast inference. Runtime grows quickly with target resolution, denoising steps, stride overlap, `view_batch_size`, and optional ControlNet/IP-Adapter conditioning. As rough references from the paper, the 2K comparison setting uses UltraDiffEdit as a 109.71 s runtime reference; a 4096 x 4096 padded ablation reports 2748-4178 s depending on the phase schedule; and the stride ablation configurations report 9561.6-10198.4 s. Start with 1K smoke tests, then increase to 2K/4K/8K after the prompt, mask, and conditioning are stable.
+
 ## Quick Start
 
 The recommended entry point is `pipeline_ultradiffedit_sdxl.py`.
@@ -118,6 +120,8 @@ images[-1].save(f"results/{name}_finalout.png")
 - `save_image_tag`: save intermediate masks and results for debugging.
 
 > **Mask warning:** For reproduction and recommended use, pass dilated masks rather than tight object masks. The paper uses dilated masks to give the diffusion model more editing freedom around object boundaries; tight masks can over-constrain the edit and often produce harder seams or incomplete changes.
+
+> **Editing quality warning:** The method is tuning-free, but successful editing still depends on the input setup. A single prompt, mask, seed, visual prompt, foreground object, or reference image is not guaranteed to work for every background. For best results, make the text prompt and optional visual conditions semantically compatible with the target image, use a mask that gives enough boundary freedom, and tune the seed, mask dilation, IP-Adapter scale, ControlNet condition, `strength`, or guidance settings when the foreground and background do not blend naturally.
 
 ## Optional Multimodal Examples
 
