@@ -3,16 +3,18 @@ from __future__ import annotations
 import argparse
 import sys
 from pathlib import Path
+from typing import Optional
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from model_cache import configure_model_cache
+from model_cache import configure_model_cache, ensure_model_cache_dir
 
 configure_model_cache()
 
 import torch
+from huggingface_hub import hf_hub_download
 from PIL import Image
 
 from examples.common import (
@@ -30,6 +32,22 @@ from examples.common import (
 from ip_adapter import IPAdapterXL, IPAdapterXL_ultra_inpaint
 
 
+DEFAULT_IMAGE_ENCODER_PATH = "laion/CLIP-ViT-bigG-14-laion2B-39B-b160k"
+DEFAULT_IP_ADAPTER_REPO = "h94/IP-Adapter"
+DEFAULT_IP_ADAPTER_FILENAME = "sdxl_models/ip-adapter_sdxl.bin"
+
+
+def resolve_ip_ckpt(ip_ckpt: Optional[str]) -> str:
+    if ip_ckpt:
+        return ip_ckpt
+
+    return hf_hub_download(
+        repo_id=DEFAULT_IP_ADAPTER_REPO,
+        filename=DEFAULT_IP_ADAPTER_FILENAME,
+        cache_dir=ensure_model_cache_dir(),
+    )
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="UltraDiffEdit with IP-Adapter guided inpainting.")
     parser.add_argument("--image", required=True, help="Target image path or URL.")
@@ -39,8 +57,19 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--negative_prompt", default=DEFAULT_NEGATIVE_PROMPT)
     parser.add_argument("--output", default="results/ip_adapter.png")
     parser.add_argument("--ckpt", default="stabilityai/stable-diffusion-xl-base-1.0")
-    parser.add_argument("--image_encoder_path", required=True, help="CLIP image encoder path, e.g. laion/CLIP-ViT-bigG-14-laion2B-39B-b160k.")
-    parser.add_argument("--ip_ckpt", required=True, help="IP-Adapter SDXL checkpoint path.")
+    parser.add_argument(
+        "--image_encoder_path",
+        default=DEFAULT_IMAGE_ENCODER_PATH,
+        help=f"CLIP image encoder repo id or local path. Default: {DEFAULT_IMAGE_ENCODER_PATH}.",
+    )
+    parser.add_argument(
+        "--ip_ckpt",
+        default=None,
+        help=(
+            "Local IP-Adapter SDXL checkpoint path. If omitted, the script downloads "
+            f"{DEFAULT_IP_ADAPTER_REPO}/{DEFAULT_IP_ADAPTER_FILENAME}."
+        ),
+    )
     parser.add_argument("--target_width", type=int, default=None)
     parser.add_argument("--target_height", type=int, default=None)
     parser.add_argument("--seed", type=int, default=5)
@@ -64,6 +93,7 @@ def main() -> None:
     args = parse_args()
     device = "cuda" if torch.cuda.is_available() else "cpu"
     dtype = torch_dtype_for_device(device)
+    ip_ckpt = resolve_ip_ckpt(args.ip_ckpt)
 
     image = load_rgb(args.image)
     mask = load_rgb(args.mask)
@@ -81,7 +111,7 @@ def main() -> None:
     first_mask = mask.resize(first_size, Image.Resampling.NEAREST)
 
     first_pipe = load_sdxl_inpaint_pipeline(args.ckpt, dtype, device)
-    first_adapter = IPAdapterXL(first_pipe, args.image_encoder_path, args.ip_ckpt, device)
+    first_adapter = IPAdapterXL(first_pipe, args.image_encoder_path, ip_ckpt, device)
     first_images = first_adapter.generate(
         pil_image=reference_image,
         prompt=args.prompt,
@@ -117,7 +147,7 @@ def main() -> None:
     )
 
     pipe = load_ultradiffedit_pipeline(args.ckpt, dtype, device)
-    adapter = IPAdapterXL_ultra_inpaint(pipe, args.image_encoder_path, args.ip_ckpt, device)
+    adapter = IPAdapterXL_ultra_inpaint(pipe, args.image_encoder_path, ip_ckpt, device)
 
     images = adapter.generate(
         prompt=args.prompt,

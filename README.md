@@ -130,7 +130,7 @@ The official pipeline remains `pipeline_ultradiffedit_sdxl.py`. Clean public exa
 - `examples/controlnet_canny.py`: Canny-conditioned editing. The default Canny thresholds are 100 and 200, matching the supplemental setup.
 - `examples/controlnet_depth.py`: DPT depth-conditioned editing.
 - `examples/controlnet_pose.py`: OpenPose-conditioned editing.
-- `examples/ip_adapter_ultra.py`: IP-Adapter guided inpainting. This requires the CLIP image encoder path and IP-Adapter SDXL checkpoint path.
+- `examples/ip_adapter_ultra.py`: IP-Adapter guided inpainting. The default CLIP image encoder and IP-Adapter SDXL checkpoint are downloaded automatically.
 
 Bundled sample inputs are available under `examples/assets/`. The ControlNet sample masks are dilated masks, matching the paper setting and recommended editing setup.
 If only one of `--target_width` or `--target_height` is provided, the other side is inferred from the input aspect ratio. For high-resolution refinement, the examples may internally pad the canvas to a model-friendly size, but the saved output is cropped back to the requested target aspect ratio.
@@ -181,12 +181,33 @@ python examples/ip_adapter_ultra.py \
   --prompt "a red metallic penguin standing on a rock" \
   --target_width 2048 \
   --target_height 1356 \
-  --image_encoder_path /path/to/CLIP-ViT-bigG-14-laion2B-39B-b160k \
-  --ip_ckpt /path/to/ip-adapter_sdxl.bin \
   --output results/ip_adapter_penguin.png
 ```
 
 For ControlNet examples, the script first creates a 1K ControlNet inpainting proposal and then refines it with UltraDiffEdit at the target resolution when the target side length is larger than 1K. The IP-Adapter example uses `--image` as the target image, `--mask` as the edited region, and `--reference_image` as the IP-Adapter visual prompt. At 1K it directly runs SDXL inpainting with IP-Adapter; targets larger than 1K first create a 1K IP-Adapter inpainting proposal in the target aspect ratio and then refine that proposal with UltraDiffEdit. The raw historical `DemoFusion-main/` experiment folder is intentionally ignored and is not required for the public examples.
+
+IP-Adapter weights are downloaded automatically by default. The script uses the CLIP image encoder `laion/CLIP-ViT-bigG-14-laion2B-39B-b160k` and downloads `sdxl_models/ip-adapter_sdxl.bin` from `h94/IP-Adapter`. These files follow the same Hugging Face cache rule as the other examples: set `ULTRADIFFEDIT_MODEL_CACHE` to choose the download disk, or leave it unset to use the default Hugging Face cache.
+
+For offline use or manually managed checkpoints, download the weights first and pass the local paths:
+
+```bash
+huggingface-cli download laion/CLIP-ViT-bigG-14-laion2B-39B-b160k \
+  --local-dir /path/to/CLIP-ViT-bigG-14-laion2B-39B-b160k
+
+huggingface-cli download h94/IP-Adapter sdxl_models/ip-adapter_sdxl.bin \
+  --local-dir /path/to/IP-Adapter
+
+python examples/ip_adapter_ultra.py \
+  --image examples/assets/penguin.png \
+  --mask examples/assets/penguin_mask_dilate.png \
+  --reference_image examples/assets/person.png \
+  --prompt "a red metallic penguin standing on a rock" \
+  --target_width 2048 \
+  --target_height 1356 \
+  --image_encoder_path /path/to/CLIP-ViT-bigG-14-laion2B-39B-b160k \
+  --ip_ckpt /path/to/IP-Adapter/sdxl_models/ip-adapter_sdxl.bin \
+  --output results/ip_adapter_penguin.png
+```
 
 ## Repository Notes
 
