@@ -2,6 +2,7 @@
 
 [![IEEE TNNLS](https://img.shields.io/badge/IEEE%20TNNLS-2026-00629B?logo=ieee&logoColor=white)](https://doi.org/10.1109/TNNLS.2026.3707463)
 [![Video](https://img.shields.io/badge/Video-YouTube-FF0000?logo=youtube&logoColor=white)](https://www.youtube.com/watch?v=6Kht_Fewioc)
+[![Video](https://img.shields.io/badge/Video-Bilibili-00A1D6?logo=bilibili&logoColor=white)](https://www.bilibili.com/video/BV155MP6ZEXg/)
 [![GitHub Stars](https://img.shields.io/github/stars/LonglongaaaGo/UltraDiffEdit?style=social)](https://github.com/LonglongaaaGo/UltraDiffEdit/stargazers)
 [![Visitors](https://visitor-badge.laobi.icu/badge?page_id=LonglongaaaGo.UltraDiffEdit)](https://github.com/LonglongaaaGo/UltraDiffEdit)
 [![License](https://img.shields.io/badge/License-Apache--2.0-blue.svg)](LICENSE)
@@ -125,7 +126,7 @@ The official pipeline remains `pipeline_ultradiffedit_sdxl.py`. Clean public exa
 - `examples/controlnet_canny.py`: Canny-conditioned editing. The default Canny thresholds are 100 and 200, matching the supplemental setup.
 - `examples/controlnet_depth.py`: DPT depth-conditioned editing.
 - `examples/controlnet_pose.py`: OpenPose-conditioned editing.
-- `examples/ip_adapter_ultra.py`: IP-Adapter visual-prompt generation. This requires the CLIP image encoder path and IP-Adapter SDXL checkpoint path.
+- `examples/ip_adapter_ultra.py`: IP-Adapter guided inpainting. This requires the CLIP image encoder path and IP-Adapter SDXL checkpoint path.
 
 Bundled sample inputs are available under `examples/assets/`. The ControlNet sample masks are dilated masks, matching the paper setting and recommended editing setup.
 If only one of `--target_width` or `--target_height` is provided, the other side is inferred from the input aspect ratio. For high-resolution refinement, the examples may internally pad the canvas to a model-friendly size, but the saved output is cropped back to the requested target aspect ratio.
@@ -170,16 +171,18 @@ IP-Adapter example:
 
 ```bash
 python examples/ip_adapter_ultra.py \
-  --image examples/assets/person.png \
-  --prompt "best quality, high quality" \
+  --image examples/assets/penguin.png \
+  --mask examples/assets/penguin_mask_dilate.png \
+  --reference_image examples/assets/person.png \
+  --prompt "a red metallic penguin standing on a rock" \
   --target_width 2048 \
-  --target_height 2048 \
+  --target_height 1356 \
   --image_encoder_path /path/to/CLIP-ViT-bigG-14-laion2B-39B-b160k \
   --ip_ckpt /path/to/ip-adapter_sdxl.bin \
-  --output results/ip_adapter_person.png
+  --output results/ip_adapter_penguin.png
 ```
 
-For ControlNet examples, the script first creates a 1K ControlNet inpainting proposal and then refines it with UltraDiffEdit at the target resolution when the target side length is larger than 1K. The IP-Adapter example follows the supplementary visual-prompt generation setting: at 1K it directly runs SDXL with IP-Adapter, while targets larger than 1K first create a 1K IP-Adapter proposal in the target aspect ratio and then refine that proposal with UltraDiffEdit using a full-image mask. The raw historical `DemoFusion-main/` experiment folder is intentionally ignored and is not required for the public examples.
+For ControlNet examples, the script first creates a 1K ControlNet inpainting proposal and then refines it with UltraDiffEdit at the target resolution when the target side length is larger than 1K. The IP-Adapter example uses `--image` as the target image, `--mask` as the edited region, and `--reference_image` as the IP-Adapter visual prompt. At 1K it directly runs SDXL inpainting with IP-Adapter; targets larger than 1K first create a 1K IP-Adapter inpainting proposal in the target aspect ratio and then refine that proposal with UltraDiffEdit. The raw historical `DemoFusion-main/` experiment folder is intentionally ignored and is not required for the public examples.
 
 ## Repository Notes
 

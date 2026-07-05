@@ -58,6 +58,16 @@ def load_sdxl_pipeline(ckpt: str, dtype: torch.dtype, device: str):
     return pipe.to(device)
 
 
+def load_sdxl_inpaint_pipeline(ckpt: str, dtype: torch.dtype, device: str):
+    from diffusers import StableDiffusionXLInpaintPipeline
+
+    pipe = StableDiffusionXLInpaintPipeline.from_pretrained(
+        ckpt,
+        **sdxl_from_pretrained_kwargs(dtype, device),
+    )
+    return pipe.to(device)
+
+
 def load_sdxl_controlnet_pipeline(ckpt: str, controlnet, dtype: torch.dtype, device: str):
     try:
         from diffusers import StableDiffusionXLControlNetInpaintPipeline

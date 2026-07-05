@@ -13,14 +13,16 @@ from model_cache import configure_model_cache
 configure_model_cache()
 
 import torch
+from PIL import Image
 
 from examples.common import (
     DEFAULT_NEGATIVE_PROMPT,
+    composite_edit_region,
     load_rgb,
-    load_sdxl_pipeline,
+    load_sdxl_inpaint_pipeline,
     load_ultradiffedit_pipeline,
     first_stage_size_for_target,
-    prepare_generation_inputs,
+    prepare_refinement_inputs,
     resolve_target_size,
     save_last_image,
     torch_dtype_for_device,
@@ -29,10 +31,10 @@ from ip_adapter import IPAdapterXL, IPAdapterXL_ultra_inpaint
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="UltraDiffEdit with an IP-Adapter visual prompt.")
-    parser.add_argument("--image", required=True, help="Visual prompt image path or URL consumed by IP-Adapter.")
-    parser.add_argument("--mask", default=None, help=argparse.SUPPRESS)
-    parser.add_argument("--reference_image", default=None, help=argparse.SUPPRESS)
+    parser = argparse.ArgumentParser(description="UltraDiffEdit with IP-Adapter guided inpainting.")
+    parser.add_argument("--image", required=True, help="Target image path or URL.")
+    parser.add_argument("--mask", required=True, help="Inpainting mask path or URL. White pixels are edited.")
+    parser.add_argument("--reference_image", required=True, help="Visual prompt image consumed by IP-Adapter.")
     parser.add_argument("--prompt", default="best quality, high quality")
     parser.add_argument("--negative_prompt", default=DEFAULT_NEGATIVE_PROMPT)
     parser.add_argument("--output", default="results/ip_adapter.png")
@@ -45,6 +47,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--num_inference_steps", type=int, default=30)
     parser.add_argument("--strength", type=float, default=0.8)
     parser.add_argument("--scale", type=float, default=0.8)
+    parser.add_argument("--guidance_scale", type=float, default=7.5)
+    parser.add_argument("--condition_resolution", type=int, default=1024)
     parser.add_argument("--view_batch_size", type=int, default=16)
     parser.add_argument("--stride", type=int, default=64)
     parser.add_argument("--run_stage", default="two", choices=["two", "three", "S"])
@@ -61,30 +65,41 @@ def main() -> None:
     device = "cuda" if torch.cuda.is_available() else "cpu"
     dtype = torch_dtype_for_device(device)
 
-    visual_prompt = load_rgb(args.reference_image or args.image)
-    target_width, target_height = resolve_target_size(visual_prompt, args.target_width, args.target_height)
-    if max(target_width, target_height) <= 1024:
+    image = load_rgb(args.image)
+    mask = load_rgb(args.mask)
+    reference_image = load_rgb(args.reference_image)
+    target_width, target_height = resolve_target_size(image, args.target_width, args.target_height)
+    if max(target_width, target_height) <= args.condition_resolution:
         first_width = ceil_to_multiple(target_width, 8)
         first_height = ceil_to_multiple(target_height, 8)
     else:
-        first_width, first_height = first_stage_size_for_target(target_width, target_height, 1024)
+        first_width, first_height = first_stage_size_for_target(
+            target_width, target_height, args.condition_resolution
+        )
+    first_size = (first_width, first_height)
+    first_image = image.resize(first_size, Image.Resampling.BICUBIC)
+    first_mask = mask.resize(first_size, Image.Resampling.NEAREST)
 
-    first_pipe = load_sdxl_pipeline(args.ckpt, dtype, device)
+    first_pipe = load_sdxl_inpaint_pipeline(args.ckpt, dtype, device)
     first_adapter = IPAdapterXL(first_pipe, args.image_encoder_path, args.ip_ckpt, device)
     first_images = first_adapter.generate(
-        pil_image=visual_prompt,
+        pil_image=reference_image,
         prompt=args.prompt,
         negative_prompt=args.negative_prompt,
         scale=args.scale,
         seed=args.seed,
         num_samples=1,
         num_inference_steps=args.num_inference_steps,
+        image=first_image,
+        mask_image=first_mask,
         height=first_height,
         width=first_width,
+        strength=args.strength,
+        guidance_scale=args.guidance_scale,
     )
-    first_output = first_images[-1]
+    first_output = composite_edit_region(first_images[-1], first_image, first_mask)
 
-    if max(target_width, target_height) <= 1024:
+    if max(target_width, target_height) <= args.condition_resolution:
         save_last_image([first_output], args.output, (target_width, target_height))
         return
 
@@ -92,10 +107,13 @@ def main() -> None:
     if device == "cuda":
         torch.cuda.empty_cache()
 
-    canvas, full_mask, original_size = prepare_generation_inputs(
-        target_width,
-        target_height,
-        init_image=first_output,
+    target_image = image.resize((target_width, target_height), Image.Resampling.BICUBIC)
+    target_mask = mask.resize((target_width, target_height), Image.Resampling.NEAREST)
+    target_first_output = first_output.resize((target_width, target_height), Image.Resampling.BICUBIC)
+    refine_seed = composite_edit_region(target_first_output, target_image, target_mask)
+
+    refine_image, refine_mask, _content_image, original_size = prepare_refinement_inputs(
+        refine_seed, mask, refine_seed, target_width, target_height
     )
 
     pipe = load_ultradiffedit_pipeline(args.ckpt, dtype, device)
@@ -104,16 +122,16 @@ def main() -> None:
     images = adapter.generate(
         prompt=args.prompt,
         negative_prompt=args.negative_prompt,
-        image=visual_prompt,
-        edit_image=canvas,
-        mask_image=full_mask,
+        image=reference_image,
+        edit_image=refine_image,
+        mask_image=refine_mask,
         scale=args.scale,
         seed=args.seed,
         num_samples=1,
         num_inference_steps=args.num_inference_steps,
         strength=args.strength,
-        tar_height=canvas.size[1],
-        tar_width=canvas.size[0],
+        tar_height=refine_image.size[1],
+        tar_width=refine_image.size[0],
         view_batch_size=args.view_batch_size,
         stride=args.stride,
         beta_scale_1=3,
