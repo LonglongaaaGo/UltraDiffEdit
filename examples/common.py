@@ -112,6 +112,13 @@ def make_canny_condition(image: Image.Image, low_threshold: int, high_threshold:
     return Image.fromarray(edges)
 
 
+def first_stage_size_for_target(width: int, height: int, resolution: int = 1024) -> tuple[int, int]:
+    first_width, first_height = get_start_size(width, height, fix_size=resolution)
+    first_width = max(8, (first_width // 8) * 8)
+    first_height = max(8, (first_height // 8) * 8)
+    return first_width, first_height
+
+
 def resize_for_first_stage(
     image: Image.Image,
     mask: Image.Image,
@@ -119,9 +126,7 @@ def resize_for_first_stage(
     resolution: int,
 ) -> tuple[Image.Image, Image.Image, Image.Image, tuple[int, int]]:
     width, height = image.size
-    first_width, first_height = get_start_size(width, height, fix_size=resolution)
-    first_width = max(8, (first_width // 8) * 8)
-    first_height = max(8, (first_height // 8) * 8)
+    first_width, first_height = first_stage_size_for_target(width, height, resolution)
     size = (first_width, first_height)
     return (
         image.resize(size, Image.Resampling.BICUBIC),

@@ -19,8 +19,8 @@ from examples.common import (
     load_rgb,
     load_sdxl_pipeline,
     load_ultradiffedit_pipeline,
+    first_stage_size_for_target,
     prepare_generation_inputs,
-    resize_for_first_stage,
     resolve_target_size,
     save_last_image,
     torch_dtype_for_device,
@@ -43,7 +43,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--target_height", type=int, default=None)
     parser.add_argument("--seed", type=int, default=5)
     parser.add_argument("--num_inference_steps", type=int, default=30)
-    parser.add_argument("--strength", type=float, default=0.9999)
+    parser.add_argument("--strength", type=float, default=0.8)
     parser.add_argument("--scale", type=float, default=0.8)
     parser.add_argument("--view_batch_size", type=int, default=16)
     parser.add_argument("--stride", type=int, default=64)
@@ -67,10 +67,7 @@ def main() -> None:
         first_width = ceil_to_multiple(target_width, 8)
         first_height = ceil_to_multiple(target_height, 8)
     else:
-        _first_image, _first_mask, _first_control, first_size = resize_for_first_stage(
-            visual_prompt, visual_prompt, visual_prompt, 1024
-        )
-        first_width, first_height = first_size
+        first_width, first_height = first_stage_size_for_target(target_width, target_height, 1024)
 
     first_pipe = load_sdxl_pipeline(args.ckpt, dtype, device)
     first_adapter = IPAdapterXL(first_pipe, args.image_encoder_path, args.ip_ckpt, device)

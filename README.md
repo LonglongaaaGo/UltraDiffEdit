@@ -179,7 +179,7 @@ python examples/ip_adapter_ultra.py \
   --output results/ip_adapter_person.png
 ```
 
-For ControlNet examples, the script first creates a 1K ControlNet inpainting proposal and then refines it with UltraDiffEdit at the target resolution when the target side length is larger than 1K. The IP-Adapter example follows the supplementary visual-prompt generation setting: at 1K it directly runs SDXL with IP-Adapter, while targets larger than 1K use the visual prompt image as IP-Adapter conditioning and then invoke UltraDiffEdit on an internal blank canvas with a full mask. The raw historical `DemoFusion-main/` experiment folder is intentionally ignored and is not required for the public examples.
+For ControlNet examples, the script first creates a 1K ControlNet inpainting proposal and then refines it with UltraDiffEdit at the target resolution when the target side length is larger than 1K. The IP-Adapter example follows the supplementary visual-prompt generation setting: at 1K it directly runs SDXL with IP-Adapter, while targets larger than 1K first create a 1K IP-Adapter proposal in the target aspect ratio and then refine that proposal with UltraDiffEdit using a full-image mask. The raw historical `DemoFusion-main/` experiment folder is intentionally ignored and is not required for the public examples.
 
 ## Repository Notes
 
