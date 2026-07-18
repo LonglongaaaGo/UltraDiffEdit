@@ -229,11 +229,11 @@ Source and generation papers:
 [![DemoFusion](https://img.shields.io/badge/DemoFusion-CVPR%202024-6A4C93.svg)](https://arxiv.org/abs/2311.16973)
 [![UHRSD](https://img.shields.io/badge/UHRSD-CVPR%202022-2E7D32.svg)](https://openaccess.thecvf.com/content/CVPR2022/html/Xie_Pyramid_Grafting_Network_for_One-Stage_High_Resolution_Saliency_Detection_CVPR_2022_paper.html)
 
-| Benchmark | Source and Scale | Released Contents | Download |
-| --- | --- | --- | --- |
-| DIV2KEdit | 100 real 2K images from the DIV2K validation set. | Images, BLIP-2 prompts, manually adjusted object masks, dilated masks, and edge/sketch maps. | [Baidu Netdisk](https://pan.baidu.com/s/1L8_gIIzCn2gEpei7kuuy3A?pwd=xcfy), password: `xcfy`; [Google Drive](https://drive.google.com/file/d/1KDWC_Ysb3C33_xkeyG--oLgI2qhqC7OO/view?usp=sharing). |
-| Syn2KEdit | 100 synthetic 2048 x 2048 images generated from ChatGPT prompts and DemoFusion, covering diverse styles, scenes, and objects. | Images, text prompts, editing masks, dilated masks, and generated condition maps. | [Baidu Netdisk](https://pan.baidu.com/s/1o46DmbLBfUgIfl_feZtlKQ?pwd=ign3), password: `ign3`; [Google Drive](https://drive.google.com/file/d/1e6M7FHtN53j8PR3OQk9eXIPp9G-lKBer/view?usp=sharing). |
-| UHRSDEdit | 988 real images from the UHRSD test set, with resolutions ranging from 4K to 8K. | Images, prompts, saliency-derived editing masks, dilated masks, and generated condition maps. | [Baidu Netdisk](https://pan.baidu.com/s/1NQecPyqp22uKdJKfpoFlGA?pwd=b69w), password: `b69w`; Google Drive pending. |
+| Benchmark | Source and Scale | Released Contents | Download                                                                                                                                                                                         |
+| --- | --- | --- |--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| DIV2KEdit | 100 real 2K images from the DIV2K validation set. | Images, BLIP-2 prompts, manually adjusted object masks, dilated masks, and edge/sketch maps. | [Baidu Netdisk](https://pan.baidu.com/s/1EXW9rVsWJnDzaYa8D5xB0Q?pwd=36x3), password: `36x3`; [Google Drive](https://drive.google.com/file/d/1AfKAmQbufM378xFjqheMLcXXujI9eecr/view?usp=sharing). |
+| Syn2KEdit | 100 synthetic 2048 x 2048 images generated from ChatGPT prompts and DemoFusion, covering diverse styles, scenes, and objects. | Images, text prompts, editing masks, dilated masks, and generated condition maps. | [Baidu Netdisk](https://pan.baidu.com/s/11PP7Wh1DcWpqbZyw8S8NLg?pwd=ssri), password: `ssri`; [Google Drive](https://drive.google.com/file/d/1R2Qq51nr2t40gA8kxB_mdGKEytbZ4tS3/view?usp=sharing). |
+| UHRSDEdit | 988 real images from the UHRSD test set, with resolutions ranging from 4K to 8K. | Images, prompts, saliency-derived editing masks, dilated masks, and generated condition maps. | [Baidu Netdisk](https://pan.baidu.com/s/1uOlY7EmYhF2umZvlheraSA?pwd=6sf7), password: `6sf7`; [Google Drive](https://drive.google.com/file/d/1RRieBChGK1i-i0coz_tJJigi2QaCijY8/view?usp=sharing.) |
 
 After extraction, each dataset sample uses matched file names across subfolders. The local `DIV2K_edit/` example follows this organization:
 
